@@ -43,29 +43,6 @@ def printValue():
         sheet_name = ent_sheet_name.get()
     win.destroy()
 
-def menuFinancials():
-    True
-    
-# menu
-menubar = Menu(win, background = '#dd3c03', foreground = 'black')
-
-menu = Menu(menubar, tearoff = False, background = '#dd3c03')
-help = Menu(menubar, tearoff = False, background = '#dd3c03')
-
-
-menubar.add_cascade(label = "Menu", menu = menu)
-menubar.add_cascade(label = "Help", menu = help)
-
-menu.add_command(label = "Financials", command = menuFinancials())
-menu.add_command(label = "Coming Soon")
-menu.add_command(label="Exit", command = win.quit)
-  
-help.add_command(label = "Cut")
-help.add_command(label = "Copy")
-help.add_command(label = "Paste")
-
-win.config(menu = menubar)
-
 # stock ticker
 ent_ticker_txt = Label(win, bg = 'black', fg = 'orange', text = 'Ticker: ').grid(row = 1, sticky = W)
 
