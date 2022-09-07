@@ -27,20 +27,13 @@ win = tkinter.Tk('Booberg Terminel')
 win.title('Booberg Terminel')
 win.geometry('440x330+650+250')
 win.iconbitmap('assets/monke.ico')
+win.configure(bg = 'black')
 
 # run button function
 def printValue():
-    global ticker, ss_path, sheet_name, export, get_is, get_bs, get_cf, get_fy, get_fq
+    global ticker, ss_path, sheet_name, export
     ticker = ent_ticker.get()
     if not ticker:
-        return
-    get_is = cbvar_is.get()
-    get_bs = cbvar_bs.get()
-    get_cf = cbvar_cf.get()
-    get_fy = cbvar_annual.get()
-    get_fq = cbvar_quarterly.get()
-    sum = get_is + get_bs + get_cf + get_fy + get_fq 
-    if sum == 0:
         return
     export = cbvar_export.get()
     if export == 1:
@@ -50,41 +43,46 @@ def printValue():
         sheet_name = ent_sheet_name.get()
     win.destroy()
 
-# title
-boober_terminel_title = Label(win, text = 'BOOBERG TERMINEL', font = 'Romantic').grid(row = 0, columnspan = 3)
+def menuFinancials():
+    True
+    
+# menu
+menubar = Menu(win, background = '#dd3c03', foreground = 'black')
+
+menu = Menu(menubar, tearoff = False, background = '#dd3c03')
+help = Menu(menubar, tearoff = False, background = '#dd3c03')
+
+
+menubar.add_cascade(label = "Menu", menu = menu)
+menubar.add_cascade(label = "Help", menu = help)
+
+menu.add_command(label = "Financials", command = menuFinancials())
+menu.add_command(label = "Coming Soon")
+menu.add_command(label="Exit", command = win.quit)
+  
+help.add_command(label = "Cut")
+help.add_command(label = "Copy")
+help.add_command(label = "Paste")
+
+win.config(menu = menubar)
 
 # stock ticker
-ent_ticker_txt= Label(win, text = 'Ticker: ').grid(row = 1, sticky = W) 
-ent_ticker = Entry(win)
+ent_ticker_txt = Label(win, bg = 'black', fg = 'orange', text = 'Ticker: ').grid(row = 1, sticky = W)
+
+ent_ticker = Entry(win, background = 'orange')
 ent_ticker.grid(row = 1, column = 1) 
-
-# income statement, balance sheet, cashflow statement checkbox
-cbvar_is = IntVar() 
-cbvar_bs = IntVar() 
-cbvar_cf = IntVar() 
-
-cb_is = Checkbutton(win, text = 'Income Statement', variable = cbvar_is, onvalue = 1, offvalue = 0).grid(row = 2, sticky = W) 
-cb_bs = Checkbutton(win, text = 'Balance Sheet', variable = cbvar_bs, onvalue = 1, offvalue = 0).grid(row = 2, column = 1, sticky = W) 
-cb_cf = Checkbutton(win, text = 'Cashflow Statement', variable = cbvar_cf, onvalue = 1, offvalue = 0).grid(row = 2, column = 2, sticky = W) 
-
-# annual, quarterly checkbox
-cbvar_annual = IntVar()
-cbvar_quarterly = IntVar() 
-
-cb_annual = Checkbutton(win, text = 'Annual', variable = cbvar_annual, onvalue = 1, offvalue = 0).grid(row = 3, sticky = W) 
-cb_quarterly = Checkbutton(win, text = 'Quarterly', variable = cbvar_quarterly, onvalue = 1, offvalue = 0).grid(row = 3, column = 1, sticky = W) 
 
 # excel
 cbvar_export = IntVar()
 
-cb_export = Checkbutton(win, text = 'Export to Excel', variable = cbvar_export, onvalue = 1, offvalue = 0).grid(row = 6, sticky = W) 
+cb_export = Checkbutton(win, bg = 'black', fg = 'orange', text = 'Export to Excel', variable = cbvar_export, onvalue = 1, offvalue = 0).grid(row = 6, sticky = W) 
 
-ent_ss_path_text = Label(win, text = 'Spreadsheet path: ').grid(row = 7, sticky = W) 
-ent_ss_path = Entry(win)
+ent_ss_path_text = Label(win, bg = 'black', fg = 'orange', text = 'Spreadsheet path: ').grid(row = 7, sticky = W) 
+ent_ss_path = Entry(win, background = 'orange')
 ent_ss_path.grid(row = 7, column = 1) 
 
-ent_sheet_name_text = Label(win, text = 'Sheet name (optional): ').grid(row = 8, sticky = W) 
-ent_sheet_name = Entry(win)
+ent_sheet_name_text = Label(win, bg = 'black', fg = 'orange', text = 'Sheet name (optional): ').grid(row = 8, sticky = W) 
+ent_sheet_name = Entry(win, background = 'orange')
 ent_sheet_name.grid(row = 8, column = 1) 
 
 # run button
@@ -110,7 +108,7 @@ driver.find_element(By.XPATH, '/html/body/div/div/div/div/form/div[2]/div[2]/but
 def get_table():
     html = driver.execute_script('return document.body.innerHTML;')
     soup = BeautifulSoup(html,'lxml')
-
+    
     features = soup.find_all('div', class_ = 'D(tbr)')
 
     headers = []
@@ -138,7 +136,7 @@ def get_table():
         # clear temp_list
         temp_list = []
         index += 1
-
+        
     cool_table = pd.DataFrame(final[1:])
     cool_table.columns = headers
     return cool_table
@@ -156,121 +154,95 @@ def expand_table():
 
 # -------| INCOME STATEMENT
 
-if get_is == 1:
+expand_table()
 
-    expand_table()
+is_fy = get_table()
 
-    # annual income statement
-    if get_fy == 1:
-        is_fy = get_table()
+# click quarterly
+try:
+    wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[2]/button/div/span')))
+    time.sleep(0.7)
+    driver.find_element(By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[2]/button/div/span').click()
+except:
+    print("\n\nAn error occurred!\n")
+time.sleep(2)
 
-
-    # quarterly income statement
-    if get_fq == 1:
-        # click quarterly
-        try:
-            wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[2]/button/div/span')))
-            time.sleep(0.7)
-            driver.find_element(By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[2]/button/div/span').click()
-        except:
-            print("\n\nAn error occurred!\n")
-        time.sleep(2)
-
-        is_fq = get_table()
-
+is_fq = get_table()
 
 
 # -------| BALANCE SHEET
 
-if get_bs == 1:
+# click balance sheet
+try:
+    wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[1]/div/div[2]/a/div/span')))
+    time.sleep(0.7)
+    driver.find_element(By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[1]/div/div[2]/a/div/span').click()
+except:
+    print("\n\nAn error occurred!\n")
+time.sleep(2)
 
-    # click balance sheet
-    try:
-        wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[1]/div/div[2]/a/div/span')))
-        time.sleep(0.7)
-        driver.find_element(By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[1]/div/div[2]/a/div/span').click()
-    except:
-        print("\n\nAn error occurred!\n")
-    time.sleep(2)
+expand_table()
 
-    expand_table()
+bs_fy = get_table()
 
-    # annual balance sheet
-    if get_fy == 1:
-        bs_fy = get_table()
+# click quarterly
+try:
+    wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[2]/button/div/span')))
+    time.sleep(0.7)
+    driver.find_element(By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[2]/button/div/span').click()
+except:
+    print("\n\nAn error occurred!\n")
+time.sleep(2)
 
-
-    # quarterly balance sheet
-    if get_fq == 1:
-        # click quarterly
-        try:
-            wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[2]/button/div/span')))
-            time.sleep(0.7)
-            driver.find_element(By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[2]/button/div/span').click()
-        except:
-            print("\n\nAn error occurred!\n")
-        time.sleep(2)
-
-        bs_fq = get_table()
+bs_fq = get_table()
 
 
 # -------| CASHFLOW STATEMENT
 
-if get_cf == 1:
+# click cash flow
+try:
+    wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[1]/div/div[3]/a/div/span')))
+    time.sleep(0.7)
+    driver.find_element(By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[1]/div/div[3]/a/div/span').click()
+except:
+    print("\n\nAn error occurred!\n")
+time.sleep(2)
 
-    # click cash flow
-    try:
-        wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[1]/div/div[3]/a/div/span')))
-        time.sleep(0.7)
-        driver.find_element(By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[1]/div/div[3]/a/div/span').click()
-    except:
-        print("\n\nAn error occurred!\n")
-    time.sleep(2)
+expand_table()
 
-    expand_table()
+cf_fy = get_table()
 
-    # annual cash flow
-    if get_fy == 1:
-        cf_fy = get_table()
+# click quarterly
+try:
+    wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[2]/button/div/span')))
+    time.sleep(0.7)
+    driver.find_element(By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[2]/button/div/span').click()
+except:
+    print("\n\nAn error occurred!\n")
+time.sleep(2)
 
-    # quarterly cash flow
-    if get_fq == 1:
-        # click quarterly
-        try:
-            wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[2]/button/div/span')))
-            time.sleep(0.7)
-            driver.find_element(By.XPATH, '//*[@id="Col1-1-Financials-Proxy"]/section/div[1]/div[2]/button/div/span').click()
-        except:
-            print("\n\nAn error occurred!\n")
-        time.sleep(2)
-
-        cf_fq = get_table()
+cf_fq = get_table()
 
 
 # -------| OUTPUT
-if get_is:
-    if get_fy:
-        print("\n\n\nINCOME STATEMENT (ANNUAL)\n")
-        print(is_fy)
-    if get_fq:
-        print("\n\n\nINCOME STATEMENT (QUARTERLY)\n")
-        print(is_fq)
 
-if get_bs:
-    if get_fy:
-        print("\n\n\nBALANCE SHEET (ANNUAL)\n")
-        print(bs_fy)
-    if get_fq:
-        print("\n\n\nBALANCE SHEET (QUARTERLY)\n")
-        print(bs_fq)
+print("\n\n\nINCOME STATEMENT (ANNUAL)\n")
+print(is_fy)
 
-if get_cf:
-    if get_fy:
-        print("\n\n\nCASH FLOW STATEMENT (ANNUAL)\n")
-        print(cf_fy)
-    if get_fq: 
-        print("\n\n\nCASH FLOW STATEMENT (QUARTERLY)\n")
-        print(cf_fq)
+print("\n\n\nINCOME STATEMENT (QUARTERLY)\n")
+print(is_fq)
+
+print("\n\n\nBALANCE SHEET (ANNUAL)\n")
+print(bs_fy)
+
+print("\n\n\nBALANCE SHEET (QUARTERLY)\n")
+print(bs_fq)
+
+print("\n\n\nCASH FLOW STATEMENT (ANNUAL)\n")
+print(cf_fy)
+
+print("\n\n\nCASH FLOW STATEMENT (QUARTERLY)\n")
+print(cf_fq)
 
 
 
@@ -280,32 +252,17 @@ if export == 1:
     # Creating Excel Writer Object from Pandas  
     writer = pd.ExcelWriter(ss_path, engine = 'xlsxwriter')
 
-    if get_is:
-        if get_fy:
-            is_fy.to_excel(writer, startrow = 1, startcol = 1)
-        if get_fq:
-            is_fq.to_excel(writer, startrow = 1 + len(is_fy) + 4, startcol = 1)
-
-    if get_bs:
-        if get_fy:
-            bs_fy.to_excel(writer, startrow = 1 + len(is_fy) + len(is_fq) + 8, startcol = 1)
-        if get_fq:
-            bs_fq.to_excel(writer, startrow = 1 + len(is_fy) + len(is_fq) + len(bs_fy) + 12, startcol = 1)
-
-    if get_cf:
-        if get_fy:
-            cf_fy.to_excel(writer, startrow = 1 + len(is_fy) + len(is_fq) + len(bs_fy) + len(bs_fq) + 16, startcol = 1)
-        if get_fq: 
-            cf_fq.to_excel(writer, startrow = 1 + len(is_fy) + len(is_fq) + len(bs_fy) + len(bs_fq) + len(cf_fy) + 20, startcol = 1)
-
+    is_fy.to_excel(writer, startrow = 1, startcol = 1)
+    is_fq.to_excel(writer, startrow = 1, startcol = 1 + len(is_fy.columns) + 2)
+    bs_fy.to_excel(writer, startrow = 1 + len(is_fy) + 4, startcol = 1)
+    bs_fq.to_excel(writer, startrow = 1 + len(is_fy) + 4, startcol = 1 + len(bs_fy.columns) + 2)
+    cf_fy.to_excel(writer, startrow = 1 + len(is_fy) + len(bs_fy) + 8, startcol = 1)
+    cf_fq.to_excel(writer, startrow = 1 + len(is_fy) + len(bs_fy) + 8, startcol = 1 + len(cf_fy.columns) + 2)
+    
     writer.save()
-
+    
 # -------| DRIVER QUIT
 
 # deleting cookies and terminating the webdriver
 driver.delete_all_cookies()
 driver.quit()
-
-# -------| 
-
-input()
