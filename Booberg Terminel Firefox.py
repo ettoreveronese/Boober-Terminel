@@ -11,29 +11,26 @@ from pandastable import Table, TableModel
 from bs4 import BeautifulSoup
 import pandas as pd
 import time
+import configparser
 
 
 # -------| SCRAPING
+config = configparser.ConfigParser()
+config.read('config.ini')
+profile_name = config['DEFAULT']['FirefoxProfile']
 
-my_service = Service("webdriver/geckodriver.exe")
-my_options = Options()
-my_options.add_argument("--headless")
-my_options.set_preference('profile', "webdriver/profiles/cw5mp8a1.BoobergTerminel")
-driver = webdriver.Firefox(service = my_service, options = my_options)
+driver_service = Service('geckodriver.exe')
+driver_options = Options()
+driver_options.add_argument("--headless")
+driver_options.set_preference('profile', profile_name)
 
-# initializing some variables
-is_fy = ""
-is_fq = ""
-bs_fy = ""
-bs_fq = ""
-cf_fy = ""
-cf_fq = ""
+driver = webdriver.Firefox(service = driver_service, options = driver_options)
 
 def get_data():
     global is_fy, is_fq, bs_fy, bs_fq, cf_fy, cf_fq
 
     # formatting
-    url_financials = "https://finance.yahoo.com/quote/{}/financials?p={}"
+    url_financials = 'https://finance.yahoo.com/quote/{}/financials?p={}'
     driver.get(url_financials.format(ticker, ticker))
 
     # fluent wait
@@ -47,7 +44,7 @@ def get_data():
     # function to expand the table if needed
     def expand_table():
         try:
-            wait.until(EC.element_to_be_clickable((By.XPATH, "//span[text() = 'Expand All']")))
+            wait.until(EC.element_to_be_clickable((By.XPATH, "//span[text() = 'Expand All'")))
             time.sleep(0.7)
             driver.find_element(By.XPATH, "//span[text() = 'Expand All']").click()
         except:
@@ -186,20 +183,23 @@ win.resizable(width=False, height=False)
 win.iconbitmap('assets/monke.ico')
 win.configure(bg = 'black')
 
+data_scraped = False
+
 # run button function
 def click_run_btn():
-    global ticker
+    global ticker, data_scraped
     ticker = ent_ticker.get()
     if not ticker:
         return
     get_data()
+    data_scraped = True
     click_rt_btn()
 
 def click_rt_btn():
+    if not data_scraped:
+        return
     var1 = dd1_var.get()
     var2 = dd2_var.get()
-    if not is_fy:
-        return
     if var1 == "Income Statement":
         if var2 == "Annual":
            pt.model.df = is_fy
@@ -218,9 +218,9 @@ def click_rt_btn():
     pt.redraw()
 
 def click_export_btn():
-    global file_path, sheet_name
-    if not is_fy:
+    if not data_scraped:
         return
+    global file_path, sheet_name
     file_path = ent_file_path.get()
     if not file_path:
         return 
@@ -239,22 +239,22 @@ btn_run.place(x = 6 + ent_ticker_txt.winfo_reqwidth() + ent_ticker.winfo_reqwidt
 
 dd1_choices = {"Income Statement", "Balance Sheet", "Cashflow Statement"}
 dd1_var = StringVar()
-dd1_var.set("Cashflow Statement")
+dd1_var.set("Income Statement")
 dd1 = OptionMenu(win, dd1_var, *dd1_choices)
 dd1.config(bg = '#ff9e2b', relief = 'flat', borderwidth = 0, highlightthickness = 0)
 dd1['menu'].config(background = '#ff9e2b', borderwidth = 0, relief = 'flat')
 dd1.place(x = 16 + ent_ticker_txt.winfo_reqwidth() + ent_ticker.winfo_reqwidth() + btn_run.winfo_reqwidth(), y = 2, width = 143, height = 23)
 
-dd2_choices = {'Annual', 'Quarterly'}
+dd2_choices = {"Annual", "Quarterly"}
 dd2_var = StringVar()
 dd2_var.set("Annual")
 dd2 = OptionMenu(win, dd2_var, *dd2_choices)
 dd2.config(bg = '#ff9e2b', relief = 'flat', borderwidth = 0, highlightthickness = 0)
 dd2['menu'].config(background = '#ff9e2b', borderwidth = 0, relief = 'flat')
-dd2.place(x = 18 + ent_ticker_txt.winfo_reqwidth() + ent_ticker.winfo_reqwidth() + btn_run.winfo_reqwidth() + dd1.winfo_reqwidth(), y = 2, height = 23)
+dd2.place(x = 18 + ent_ticker_txt.winfo_reqwidth() + ent_ticker.winfo_reqwidth() + btn_run.winfo_reqwidth() + 143, y = 2, width = 86, height = 23)
 
 btn_rt = Button(win, text = "Refresh Table", relief = 'flat', background = '#ff9e2b', command = click_rt_btn)
-btn_rt.place(x = 20 + ent_ticker_txt.winfo_reqwidth() + ent_ticker.winfo_reqwidth() + btn_run.winfo_reqwidth() + dd1.winfo_reqwidth() + dd2.winfo_reqwidth(), y = 2, height = 23)
+btn_rt.place(x = 20 + ent_ticker_txt.winfo_reqwidth() + ent_ticker.winfo_reqwidth() + btn_run.winfo_reqwidth() + 143 + 86, y = 2, height = 23)
 
 # enter spreadsheet path
 ent_file_path_text = Label(win, bg = 'black', fg = '#ff9e2b', text = 'Spreadsheet path: ')
@@ -278,4 +278,4 @@ pt = Table(frame)
 pt.setRowColors(clr = 'black')
 pt.show()
 
-win.mainloop() 
+win.mainloop()
