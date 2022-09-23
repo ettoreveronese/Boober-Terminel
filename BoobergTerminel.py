@@ -21,7 +21,7 @@ profile_name = config['DEFAULT']['FirefoxProfile']
 
 driver_service = Service('geckodriver.exe')
 driver_options = Options()
-driver_options.add_argument("--headless")
+#driver_options.add_argument("--headless")
 driver_options.set_preference('profile', profile_name)
 
 driver = webdriver.Firefox(service = driver_service, options = driver_options)
@@ -38,18 +38,17 @@ def get_data():
 
     # accepting cookies
     wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/div/div/div/div/form/div[2]/div[2]/button')))
-    time.sleep(1)
     driver.find_element(By.XPATH, '/html/body/div/div/div/div/form/div[2]/div[2]/button').click()
 
     # function to expand the table if needed
     def expand_table():
         try:
-            wait.until(EC.element_to_be_clickable((By.XPATH, "//span[text() = 'Expand All'")))
+            wait.until(EC.element_to_be_clickable((By.XPATH, "//span[text() = 'Expand All']")))
             time.sleep(0.7)
             driver.find_element(By.XPATH, "//span[text() = 'Expand All']").click()
         except:
             pass
-        time.sleep(0.7)
+        time.sleep(0.3)
 
     # function to extract the data from the html code and format it in to a table
     def get_table():
