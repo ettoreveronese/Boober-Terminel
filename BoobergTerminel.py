@@ -21,7 +21,7 @@ profile_name = config['DEFAULT']['FirefoxProfile']
 
 driver_service = Service('geckodriver.exe')
 driver_options = Options()
-#driver_options.add_argument("--headless")
+driver_options.add_argument("--headless")
 driver_options.set_preference('profile', profile_name)
 
 driver = webdriver.Firefox(service = driver_service, options = driver_options)
