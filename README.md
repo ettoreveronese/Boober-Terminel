@@ -1,12 +1,8 @@
 # Booberg Terminel (Firefox)
 Booberg Terminel fr fr fr
 
-Instructions:
-
-1 - Download BoobergTerminel.py and config.ini
-
-2 - Download geckodriver.exe (Firefox Webdriver - ) and put it in the same folder
-
-3 - Copy your Firefox profile and put it in the same folder of BoobergTerminel.py with geckodriver.exe
-
-4 - Open config.ini and do what i wrote there
+## Setup:
+- In the terminal navigate to the project folder and do "pip install -r requirements.txt"
+- Download geckodriver.exe (Firefox Webdriver) and put it in the Booberg Terminel folder
+- Copy your Firefox profile folder (%APPDATA%\Mozilla\Firefox\Profiles\) and paste it in the Booberg Terminel folder
+- Open config.ini and change the only option to your profile folder name
